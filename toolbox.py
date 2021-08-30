@@ -3,6 +3,27 @@ import numpy as np
 import random
 import matplotlib.pyplot as plt
 
+def tochain(ordering):
+    subset = ()
+    chain = [subset]
+    for item in ordering:
+        subset = tuple(sorted(list(set((*subset, item)))))
+        chain += [subset]
+    return chain
+
+def toordering(chain):
+    ordering = []
+    for i in range(1, len(chain)):
+        ordering += [*set(chain[i]).difference(set(chain[i-1]))]
+    return ordering
+
+def unique(ordering):
+    new = []
+    for i in ordering:
+        if i not in new:
+            new += [i]
+    return new
+
 # adapted from https://docs.python.org/3/library/itertools.html#itertools-recipes
 def powerset(iterable):
     "powerset([1,2,3]) --> (,) (1,) (2,) (3,) (1,2) (1,3) (2,3) (1,2,3)"
@@ -22,20 +43,32 @@ def constraints(subset, f):
     for S in powerset(subset):
         for T in powerset(subset):
             if unionize(S,T) == subset and S != subset and T != subset and S != () and T != ():                    
-                upperbounds += [f[S] + f[T] - f[intersect(S,T)]]
+                upperbounds += [f[S] + f[T]]
     return min(upperbounds), max(lowerbounds)
 
-def newfunction(n,a=1,b=10, subadditive=True, verbose=False, label="f"):
+def newmodular(n, a=1, b=10, verbose=False, label="f"):
+    universe = list(range(1,n+1))
+    values = [a]*n #np.random.randint(a,b,n)
+    f = {():0}
+    for subset in powerset(universe):
+        total = 0
+        for item in subset:
+            total += values[item-1]
+        f[subset] = total
+        if verbose: print("subset, {}[subset]".format(label), subset, f[subset])
+    def function(a): return f[a]
+    return function
+
+def newsubadditive(n,a=1,b=3, verbose=False, label="f"):
     universe = list(range(1,n+1))
     f = {():0}
     for subset in powerset(universe):
         if len(subset) == 1: # singleton
-            f[subset] = random.uniform(a,b)
+            f[subset] = np.random.randint(a,b)
         elif len(subset) > 1:
             upperbound, lowerbound = constraints(subset, f)
             if upperbound < lowerbound: print('problem!')
-            f[subset] = random.uniform(lowerbound, upperbound)
-            print(lowerbound, upperbound)
+            f[subset] = np.random.randint(lowerbound, upperbound)
         if verbose: print("subset, {}[subset]".format(label), subset, f[subset])
     def function(a): return f[a]
     return function
@@ -51,8 +84,6 @@ def newsubmodular(n,a=1,b=10):
         print(subset,i,lastswitch)
         #print(bin(i)[2:].zfill(n))
     print(record)
-
-#newsubmodular(4)
 
 def checkproperties(n, f, verbose=False):
     properties = {"monotone":True, "subadditive":True, "submodular":True}
@@ -88,6 +119,10 @@ def getchains(current, chain):
             chains += getchains(subset, [current]+chain[:])
     return chains
 
+def chainwrapper(current, chain):
+    chains = getchains(current, chain)
+    return [chain for chain in chains if len(chain)==len(current)+1]
+
 def msop(fm, gm, chain):
     obj = 0
     for i in range(len(chain)):
@@ -97,7 +132,7 @@ def msop(fm, gm, chain):
     return obj
 
 def solvemsop(n, fm, gm):
-    chains = getchains(tuple(range(1,n+1)),[])
+    chains = chainwrapper(tuple(range(1,n+1)),[])
     objectives = []
     for chain in chains:
         objectives += [msop(fm, gm, chain)]
@@ -149,8 +184,12 @@ def plot(x, subtitle="", file=""):
     else:
         plt.show()
 
+if __name__ == '__main__':
+    #f = newmodular(3, verbose=True)
+    n = 3
+    chains = chainwrapper(tuple(range(1,n+1)),[])
+    for chain in chains:
+        print(chain)
 
-f = newfunction(3, verbose=True)
-checkproperties(3, f, verbose=True)
 
 

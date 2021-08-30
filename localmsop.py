@@ -4,14 +4,6 @@ import numpy as np
 from scipy.special import comb
 import matplotlib.pyplot as plt
 
-def tochain(ordering):
-    subset = ()
-    chain = [subset]
-    for item in ordering:
-        subset = tuple(sorted(list(set((*subset, item)))))
-        chain += [subset]
-    return chain
-
 def move(ordering, i, j):
     return ordering[:j] + [ordering[i]] + ordering[j:i] + ordering[i+1:]
 
@@ -19,26 +11,30 @@ def insert(ordering, i, j):
     return ordering[:j] + [ordering[i]] + ordering[j:]
 
 def swap(ordering, i, j):
+    changed = ordering[:j] + [ordering[i]] + ordering[j+1:i] + [ordering[j]] + ordering[i+1:]
     return ordering[:j] + [ordering[i]] + ordering[j+1:i] + [ordering[j]] + ordering[i+1:]
 
-def improve(fm, gm, n, method, label=''):
+def improve(fm, gm, n, method, label='', verbose=False):
     ordering = list(range(1,n+1))
-    obj = toolbox.msop(fm, gm, tochain(ordering))
+    obj = toolbox.msop(fm, gm, toolbox.tochain(ordering))
     objmin, chainmin = toolbox.solvemsop(n, fm, gm)
     counter = 0
     improved = True
     while improved:
         improved = False
         for i in list(range(n))[::-1]:
-            for j in range(i-1):
+            for j in range(i):
                 new = method(ordering, i, j)
-                objnew = toolbox.msop(fm, gm, tochain(new))
+                objnew = toolbox.msop(fm, gm, toolbox.tochain(new))
                 if objnew < obj:
-                    #print('improving:', objnew, new)
                     obj = objnew
-                    ordering = new
+                    ordering = toolbox.unique(new)
                     improved = True
                 counter += 1
+    if verbose:
+        print(objmin)
+        print(toolbox.toordering(chainmin))
+        print(ordering)
     if obj/objmin > 4:
         print('Local ratio above 4: ', obj/objmin)
         print(label)
@@ -60,7 +56,7 @@ def greedy(fm, gm, n):
                 maxitem = item
         ordering += [item]
         remaining.remove(item)
-    obj = toolbox.msop(fm, gm, tochain(ordering))
+    obj = toolbox.msop(fm, gm, toolbox.tochain(ordering))
     objmin, chainmin = toolbox.solvemsop(n, fm, gm)
     if obj/objmin > 4:
         print('Greedy ratio above 4: ', obj/objmin)
@@ -73,8 +69,8 @@ def greedy(fm, gm, n):
 def compareapproximation(n, iterations):
     ratios = {'Move':[], 'Insert':[],'Greedy':[]}
     for i in range(iterations):
-        fm = toolbox.newfunction(n, a=1, b=100, subadditive=True, label="f")
-        gm = toolbox.newfunction(n, a=1, b=10, subadditive=True, label="g")
+        fm = toolbox.newsubadditive(n, a=1, b=100, subadditive=True, label="f")
+        gm = toolbox.newsubadditive(n, a=1, b=10, subadditive=True, label="g")
         ratios['Move'] += [improve(fm, gm, n, move, label='Move')]
         ratios['Insert'] += [improve(fm, gm, n, insert, label='Insert')]
         ratios['Greedy'] += [greedy(fm, gm, n)]
@@ -87,4 +83,14 @@ def compareapproximation(n, iterations):
     plt.xlabel('Approximation Ratio')
     plt.savefig('graphics/localapproxratio.pdf')
 
-compareapproximation(4, 100)
+#np.random.seed(1)
+n = 6
+verbose = True
+#for i in range(1000):
+np.random.seed(552)
+cost = toolbox.newmodular(n, label='c', verbose=verbose)
+utility = toolbox.newsubadditive(n, label='u', verbose=verbose)
+ratio = improve(cost, utility, n, insert, verbose=verbose)
+print(ratio)
+    #if ratio > 1:
+    #    print(i, ratio)
