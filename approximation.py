@@ -39,7 +39,7 @@ def constraints(subset, f):
     return min(upperbounds), max(lowerbounds)
 
 def newmodular(n, a=1, b=10, verbose=False, label="f"):
-    universe = list(range(1,n+1))
+    universe = list(range(0,n+0))
     values = [a]*n #np.random.randint(a,b,n)
     f = {():0}
     for subset in powerset(universe):
@@ -48,11 +48,11 @@ def newmodular(n, a=1, b=10, verbose=False, label="f"):
             total += values[item-1]
         f[subset] = total
         if verbose: print("subset, {}[subset]".format(label), subset, f[subset])
-    def function(a): return f[a]
+    def function(a): return f[tuple(set(a))]
     return function
 
 def newsubadditive(n,a=1,b=3, verbose=False, label="f"):
-    universe = list(range(1,n+1))
+    universe = list(range(0,n+0))
     f = {():0}
     for subset in powerset(universe):
         if len(subset) == 1: # singleton
@@ -62,24 +62,12 @@ def newsubadditive(n,a=1,b=3, verbose=False, label="f"):
             if upperbound < lowerbound: print('problem!')
             f[subset] = np.random.uniform(lowerbound, upperbound)
         if verbose: print("subset, {}[subset]".format(label), subset, f[subset])
-    def function(a): return f[a]
+    def function(a): return f[tuple(set(a))]
     return function
-
-def newsubmodular(n,a=1,b=10):
-    record = np.full((2**n,n+1), np.Inf)
-    for i in range(n): record[i+1,0] = record[i+1,i+1] = np.random.uniform(a,b)
-    powersets = powerset(list(range(1,n+1)))
-    lastswitch = 0
-    for i in range(n+1,2**n):
-        if len(powersets[i]) > len(powersets[i-1]): lastswitch=i-1
-        subset=powersets[i]
-        print(subset,i,lastswitch)
-        #print(bin(i)[2:].zfill(n))
-    print(record)
 
 def checkproperties(n, f, verbose=False):
     properties = {"monotone":True, "subadditive":True, "submodular":True}
-    universe = list(range(1,n+1))
+    universe = list(range(0,n+0))
     for S in powerset(universe):
         for T in powerset(universe):            
             if set(T).issubset(set(S)) and f(T) > f(S): # monotone
@@ -103,7 +91,7 @@ def checkproperties(n, f, verbose=False):
     return properties
 
 def solvemsop(n, c, u):
-    chains = chainwrapper(tuple(range(1,n+1)),[])
+    chains = list(itertools.permutations(range(n)))
     objectives = []
     for chain in chains:
         objectives += [toolbox.msop(c, u, chain)]
@@ -114,16 +102,16 @@ def solvemsop(n, c, u):
 if __name__ == '__main__':
     n = 5
     verbose = False
-    iterations = 1000
+    iterations = 10000
     localratios, greedyratios = [], []
     for i in range(iterations):
         cost = newmodular(n, a=10, b=100, label='c', verbose=verbose)
         utility = newsubadditive(n, a=10, b=100, label='u', verbose=verbose)
         minobj, minchain = solvemsop(n, cost, utility)
-        localobj, localorder = toolbox.local(cost, utility, n, toolbox.insert, verbose=verbose)
-        greedyobj, greedyorder = toolbox.greedy(cost, utility, n)
-        localratios += [localobj/minobj]
-        greedyratios += [greedyobj/minobj]
+        localdict = toolbox.local(cost, utility, n, toolbox.insert)
+        greedydict = toolbox.greedy(cost, utility, n)
+        localratios += [localdict['obj']/minobj]
+        greedyratios += [greedydict['obj']/minobj]
     toolbox.plothist([localratios, greedyratios], ['Local', 'Greedy'])
     
     
