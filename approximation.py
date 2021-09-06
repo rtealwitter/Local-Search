@@ -1,6 +1,7 @@
 import toolbox
 import numpy as np
 import itertools
+import matplotlib.pyplot as plt
 
 # adapted from https://docs.python.org/3/library/itertools.html#itertools-recipes
 def powerset(iterable):
@@ -55,11 +56,11 @@ def newsubadditive(n,a=1,b=3, verbose=False, label="f"):
     f = {():0}
     for subset in powerset(universe):
         if len(subset) == 1: # singleton
-            f[subset] = np.random.randint(a,b)
+            f[subset] = np.random.uniform(a,b)
         elif len(subset) > 1:
             upperbound, lowerbound = constraints(subset, f)
             if upperbound < lowerbound: print('problem!')
-            f[subset] = np.random.randint(lowerbound, upperbound)
+            f[subset] = np.random.uniform(lowerbound, upperbound)
         if verbose: print("subset, {}[subset]".format(label), subset, f[subset])
     def function(a): return f[a]
     return function
@@ -111,13 +112,18 @@ def solvemsop(n, c, u):
     return minimum, minimumchain
 
 if __name__ == '__main__':
-    n = 4
-    verbose = True
-    cost = newmodular(n, label='c', verbose=verbose)
-    utility = newsubadditive(n, label='u', verbose=verbose)
-    minobj, minchain = solvemsop(n, cost, utility)
-    localobj = toolbox.local(cost, utility, n, toolbox.insert, verbose=verbose)
-    greedyobj = toolbox.greedy(cost, utility, n)
-    print(localobj/minobj)
-    print(greedyobj/minobj)
+    n = 5
+    verbose = False
+    iterations = 1000
+    localratios, greedyratios = [], []
+    for i in range(iterations):
+        cost = newmodular(n, a=10, b=100, label='c', verbose=verbose)
+        utility = newsubadditive(n, a=10, b=100, label='u', verbose=verbose)
+        minobj, minchain = solvemsop(n, cost, utility)
+        localobj, localorder = toolbox.local(cost, utility, n, toolbox.insert, verbose=verbose)
+        greedyobj, greedyorder = toolbox.greedy(cost, utility, n)
+        localratios += [localobj/minobj]
+        greedyratios += [greedyobj/minobj]
+    plothist([localratios, greedyratios], ['Local', 'Greedy'])
+    
     

@@ -1,4 +1,5 @@
 import numpy as np
+import matplotlib.pyplot as plt
 
 def tochain(ordering):
     subset = ()
@@ -38,10 +39,11 @@ def insert(ordering, i, j):
 def swap(ordering, i, j):
     return ordering[:j] + [ordering[i]] + ordering[j+1:i] + [ordering[j]] + ordering[i+1:]
 
-def local(c, u, n, method, label='', verbose=False):
-    ordering = list(range(1,n+1))
+def local(c, u, n, method):
+    ordering = list(np.random.permutation(list(range(1,n+1))))
     obj = msop(c, u, tochain(ordering))
     improved = True
+    num_rounds = 0
     while improved:
         improved = False
         bestordering = ordering
@@ -54,23 +56,31 @@ def local(c, u, n, method, label='', verbose=False):
                     bestordering = unique(new)
                     improved = True
         ordering = bestordering
-    return msop(c, u, tochain(ordering))
+        num_rounds += 1
+    return msop(c, u, tochain(ordering)), ordering, num_rounds
 
 def greedy(c, u, n):
     remaining = list(range(1,n+1))
     ordering = []
     while len(ordering) < n:
-        maxitem = 0
-        maxratio = np.Inf
+        maxitem = 'hi'
+        maxratio = -1
         for item in remaining:
             candidate = tuple(sorted((*ordering,item)))
-            if u(candidate)/c(candidate) < maxratio:
+            if u(candidate)/c(candidate) > maxratio:
                 maxratio = u(candidate)/c(candidate)
                 maxitem = item
         ordering += [maxitem]
         remaining.remove(maxitem)
     obj = msop(c, u, tochain(ordering))
-    return obj
+    return obj, ordering
+
+def plothist(xs, labels,bin_num=20):
+    bins = np.linspace(min(sum(xs, [])), max(sum(xs, [])), bin_num)
+    for i in range(len(labels)):
+        plt.hist(xs[i], bins, alpha=0.5, label=labels[i])
+    plt.legend()
+    plt.show()
 
 if __name__ == '__main__':
     pass
