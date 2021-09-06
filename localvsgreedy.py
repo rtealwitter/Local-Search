@@ -40,7 +40,7 @@ def compare(n=10, m=20, iterations=100):
         greedydict = toolbox.greedy(cost, utility, n)
         ratios += [localdict['obj']/greedydict['obj']]
         #ratios += [greedydict['obj']/localdict['obj']]
-    plothist(ratios, 'Local to Greedy', title='Frequency of Local to Greedy Solution')
+    plothist(ratios, 'Local to Greedy', iterations=iterations, n=n, m=m)
 
 def profile(command):
     import cProfile
@@ -49,7 +49,7 @@ def profile(command):
     p = pstats.Stats('stats')
     p.sort_stats(pstats.SortKey.TIME).print_stats(30)
 
-def plothist(x, label, title='Frequency of Ratios', bin_num=20):
+def plothist(x, label, iterations, n, m, bin_num=20):
     bins = np.linspace(min(x), max(x), bin_num)
     #hist = np.histogram(x)
     #hist_dist = scipy.stats.rv_histogram(hist)
@@ -57,10 +57,10 @@ def plothist(x, label, title='Frequency of Ratios', bin_num=20):
     #plt.plot(X, hist_dist.pdf(X), label='PDF')
     plt.hist(x, bins, alpha=0.5, label=label, color='teal')
     plt.axvline(x=1, color='red')
-    plt.xlabel('Ratio')
-    plt.ylabel('Frequency')
-    plt.legend()
-    plt.title(title)
+    plt.xlabel('Local to Greedy Ratio')
+    plt.ylabel('Frequency (out of {} Iterations)'.format(iterations))
+    plt.suptitle('Histogram of Local to Greedy Ratio')
+    plt.title('Facility Location with {} Facilities and {} Customers'.format(n,m))
     plt.show()
 
 
