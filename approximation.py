@@ -124,6 +124,6 @@ if __name__ == '__main__':
         greedyobj, greedyorder = toolbox.greedy(cost, utility, n)
         localratios += [localobj/minobj]
         greedyratios += [greedyobj/minobj]
-    plothist([localratios, greedyratios], ['Local', 'Greedy'])
+    toolbox.plothist([localratios, greedyratios], ['Local', 'Greedy'])
     
     
