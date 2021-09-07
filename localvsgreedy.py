@@ -2,6 +2,7 @@ import toolbox
 import numpy as np
 import scipy.stats
 import matplotlib.pyplot as plt
+import time
 
 def genfacility(n, m, a=10, b=100):
     A = np.random.randint(a,b,size=(n,m))
@@ -29,18 +30,39 @@ def modular(n, a=10, b=100):
         return val
     return cost
 
-def compare(n=10, m=20, iterations=100):
+def compare_ratio(n=10, m=20, iterations=100):
     ratios = []
     for i in range(iterations):
         utility = genfacility(n,m)
         cost = modular(n)
-        localdict = toolbox.local(cost, utility, n, toolbox.insert)
         #print(localdict['num_rounds']) 
         #print(localdict['num_msop']) 
         greedydict = toolbox.greedy(cost, utility, n)
+        localdict = toolbox.local(cost, utility, n, toolbox.insert)#, start=greedydict['ordering'])
         ratios += [localdict['obj']/greedydict['obj']]
         #ratios += [greedydict['obj']/localdict['obj']]
     plothist(ratios, 'Local to Greedy', iterations=iterations, n=n, m=m)
+
+
+def compare_time(ns, ms, iterations=10):
+    local_times, greedy_times = [], []
+    for j in range(len(ns)):
+        n, m = ns[j], ms[j]
+        greedy_time, local_time = 0, 0
+        for i in range(iterations):
+            utility = genfacility(n,m)
+            cost = modular(n)
+            start = time.time()
+            localdict = toolbox.local(cost, utility, n, toolbox.insert)
+            local_time += time.time() - start
+            start = time.time()
+            greedydict = toolbox.greedy(cost, utility, n)
+            greedy_time += time.time() - start
+        local_times += [local_time/iterations]
+        greedy_times += [greedy_time/iterations]
+    plotplot(ns, greedy_times, 'Greedy', title='Running Time per Iteration vs Number of Facilities')
+    plotplot(ns, local_times, 'Local', title='Running Time per Iteration vs Number of Facilities')
+
 
 def profile(command):
     import cProfile
@@ -63,7 +85,24 @@ def plothist(x, label, iterations, n, m, bin_num=20):
     plt.title('Facility Location with {} Facilities and {} Customers'.format(n,m))
     plt.show()
 
+def plotplot(x, y, label, title):
+    plt.scatter(x, y, label=label)
+    for deg in [2,3]:
+        X = np.linspace(min(x), max(x), num=100)
+        coeffs = np.polyfit(x, y, deg=deg)
+        equation = '+'.join([str(coeffs[i]) + 'x^'+str(deg-i) for i in range(len(coeffs))])
+        print(equation)
+        Y = np.polyval(coeffs, X)
+        plt.plot(X, Y, label='Least Squares Degree '+str(deg))
+    plt.xlabel('Number of Facilities')
+    plt.ylabel('Time')
+    plt.legend()
+    plt.title(title)
+    plt.show()
 
-#profile('compare()')
-compare()
+
+#profile('compare_ratio()')
+#compare_ratio()
+ns = list(range(1,21))
+compare_time(ns=ns, ms=[2*i for i in ns])
 

@@ -37,8 +37,11 @@ def insert(ordering, i, j):
 def swap(ordering, i, j):
     return ordering[:j] + [ordering[i]] + ordering[j+1:i] + [ordering[j]] + ordering[i+1:]
 
-def local(c, u, n, method):
-    ordering = list(np.random.permutation(list(range(0,n+0))))
+def local(c, u, n, method, start=False):
+    if start == False:
+        ordering = list(np.random.permutation(list(range(0,n+0))))
+    else:
+        ordering = start
     obj = msop(c, u, ordering)
     improved = True
     num_rounds = 0
@@ -79,7 +82,6 @@ def plothist(xs, labels, title='Frequency of Ratios', bin_num=20):
     bins = np.linspace(min(sum(xs, [])), max(sum(xs, [])), bin_num)
     for i in range(len(labels)):
         plt.hist(xs[i], bins, alpha=0.5, label=labels[i])
-    plt.axvline(x=1, color='red')
     plt.xlabel('Ratio')
     plt.ylabel('Frequency')
     plt.legend()
