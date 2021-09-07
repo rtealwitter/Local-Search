@@ -60,8 +60,8 @@ def compare_time(ns, ms, iterations=10):
             greedy_time += time.time() - start
         local_times += [local_time/iterations]
         greedy_times += [greedy_time/iterations]
-    plotplot(ns, greedy_times, 'Greedy', title='Running Time per Iteration vs Number of Facilities')
-    plotplot(ns, local_times, 'Local', title='Running Time per Iteration vs Number of Facilities')
+    plotplot(ns, greedy_times, 'Greedy')
+    plotplot(ns, local_times, 'Local')
 
 
 def profile(command):
@@ -80,12 +80,13 @@ def plothist(x, label, iterations, n, m, bin_num=20):
     plt.hist(x, bins, alpha=0.5, label=label, color='teal')
     plt.axvline(x=1, color='red')
     plt.xlabel('Local to Greedy Ratio')
-    plt.ylabel('Frequency (out of {} Iterations)'.format(iterations))
+    plt.ylabel('Frequency ({} Iterations)'.format(iterations))
     plt.suptitle('Histogram of Local to Greedy Ratio')
     plt.title('Facility Location with {} Facilities and {} Customers'.format(n,m))
-    plt.show()
+    plt.savefig('graphics/localvsgreedy.pdf')
+    plt.clf()
 
-def plotplot(x, y, label, title):
+def plotplot(x, y, label):
     plt.scatter(x, y, label=label)
     for deg in [2,3]:
         X = np.linspace(min(x), max(x), num=100)
@@ -97,12 +98,13 @@ def plotplot(x, y, label, title):
     plt.xlabel('Number of Facilities')
     plt.ylabel('Time')
     plt.legend()
-    plt.title(title)
-    plt.show()
+    plt.title('Running Time per Iteration vs Number of Facilities')
+    plt.savefig('graphics/complexity_{}.pdf'.format(label.lower()))
+    plt.clf()
 
 
 #profile('compare_ratio()')
-#compare_ratio()
+compare_ratio()
 ns = list(range(1,21))
 compare_time(ns=ns, ms=[2*i for i in ns])
 
