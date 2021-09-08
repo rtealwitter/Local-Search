@@ -38,7 +38,7 @@ def compare_ratio(n=10, m=20, iterations=100):
         #print(localdict['num_rounds']) 
         #print(localdict['num_msop']) 
         greedydict = toolbox.greedy(cost, utility, n)
-        localdict = toolbox.local(cost, utility, n, toolbox.insert)#, start=greedydict['ordering'])
+        localdict = toolbox.local(cost, utility, n, toolbox.insert, start=greedydict['ordering'])
         ratios += [localdict['obj']/greedydict['obj']]
         #ratios += [greedydict['obj']/localdict['obj']]
     plothist(ratios, 'Local to Greedy', iterations=iterations, n=n, m=m)
@@ -53,11 +53,11 @@ def compare_time(ns, ms, iterations=10):
             utility = genfacility(n,m)
             cost = modular(n)
             start = time.time()
-            localdict = toolbox.local(cost, utility, n, toolbox.insert)
-            local_time += time.time() - start
-            start = time.time()
             greedydict = toolbox.greedy(cost, utility, n)
             greedy_time += time.time() - start
+            start = time.time()
+            localdict = toolbox.local(cost, utility, n, toolbox.insert, start=greedydict['ordering'])
+            local_time += time.time() - start
         local_times += [local_time/iterations]
         greedy_times += [greedy_time/iterations]
     plotplot(ns, greedy_times, 'Greedy')
@@ -92,7 +92,7 @@ def plotplot(x, y, label):
         X = np.linspace(min(x), max(x), num=100)
         coeffs = np.polyfit(x, y, deg=deg)
         equation = '+'.join([str(coeffs[i]) + 'x^'+str(deg-i) for i in range(len(coeffs))])
-        print(equation)
+        #print(equation)
         Y = np.polyval(coeffs, X)
         plt.plot(X, Y, label='Least Squares Degree '+str(deg))
     plt.xlabel('Number of Facilities')
