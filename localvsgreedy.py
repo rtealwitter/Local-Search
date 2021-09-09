@@ -30,18 +30,17 @@ def modular(n, a=10, b=100):
         return val
     return cost
 
-def compare_ratio(n=10, m=20, iterations=100):
-    ratios = []
+def compare_ratio(n=20, m=20, iterations=100):
+    ratios_greedy, ratios_random = [], []
     for i in range(iterations):
         utility = genfacility(n,m)
         cost = modular(n)
-        #print(localdict['num_rounds']) 
-        #print(localdict['num_msop']) 
         greedydict = toolbox.greedy(cost, utility, n)
-        localdict = toolbox.local(cost, utility, n, toolbox.insert, start=greedydict['ordering'])
-        ratios += [localdict['obj']/greedydict['obj']]
-        #ratios += [greedydict['obj']/localdict['obj']]
-    plothist(ratios, 'Local to Greedy', iterations=iterations, n=n, m=m)
+        localdict_greedy = toolbox.local(cost, utility, n, toolbox.insert, start=greedydict['ordering'])
+        ratios_greedy += [localdict_greedy['obj']/greedydict['obj']]
+        localdict_random = toolbox.local(cost, utility, n, toolbox.insert)
+        ratios_random += [localdict_random['obj']/greedydict['obj']]
+    plothist([ratios_greedy, ratios_random], ['Greedy Start', 'Random Start'], iterations=iterations, n=n, m=m)
 
 
 def compare_time(ns, ms, iterations=10):
@@ -71,16 +70,15 @@ def profile(command):
     p = pstats.Stats('stats')
     p.sort_stats(pstats.SortKey.TIME).print_stats(30)
 
-def plothist(x, label, iterations, n, m, bin_num=20):
-    bins = np.linspace(min(x), max(x), bin_num)
-    #hist = np.histogram(x)
-    #hist_dist = scipy.stats.rv_histogram(hist)
-    #X = np.linspace(min(x), max(x), 100)
-    #plt.plot(X, hist_dist.pdf(X), label='PDF')
-    plt.hist(x, bins, alpha=0.5, label=label, color='teal')
+def plothist(xs, labels, iterations, n, m, bin_num=20):
+    colors = ['#D12757', '#75CDFA', '#2437E6', '#FF6A10']
+    bins = np.linspace(min(sum(xs, [])), max(sum(xs,[])), bin_num)
+    for i in range(len(labels)):
+        plt.hist(xs[i], bins, alpha=0.5, label=labels[i], color=colors[i])
     plt.axvline(x=1, color='red')
     plt.xlabel('Local to Greedy Ratio')
     plt.ylabel('Frequency ({} Iterations)'.format(iterations))
+    plt.legend()
     plt.suptitle('Histogram of Local to Greedy Ratio')
     plt.title('Facility Location with {} Facilities and {} Customers'.format(n,m))
     plt.savefig('graphics/localvsgreedy.pdf')
@@ -105,6 +103,6 @@ def plotplot(x, y, label):
 
 #profile('compare_ratio()')
 compare_ratio()
-ns = list(range(1,21))
-compare_time(ns=ns, ms=[2*i for i in ns])
+#ns = list(range(1,21))
+#compare_time(ns=ns, ms=[2*i for i in ns])
 
