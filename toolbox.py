@@ -23,13 +23,17 @@ def msop(c, u, ordering):
     for i in range(len(ordering)):
         previous = current[:]
         current += [ordering[i]]
-        current.sort()
         obj += c(current) * (u(current) - u(previous))
     precomputed[key] = obj
     return obj
 
 def move(ordering, i, j):
-    return ordering[:j] + [ordering[i]] + ordering[j:i] + ordering[i+1:]
+    if i == j:
+        return ordering
+    if i < j:
+        return ordering[:i] + ordering[(i+1):(j+1)] + [ordering[i]] + ordering[(j+1):]
+    if j < i:
+        return ordering[:j] + [ordering[i]] + ordering[j:i] + ordering[(i+1):]
 
 def insert(ordering, i, j):
     return ordering[:j] + [ordering[i]] + ordering[j:]
@@ -39,7 +43,10 @@ def swap(ordering, i, j):
 
 def local(c, u, n, method, start=False):
     if start == False:
-        ordering = list(np.random.permutation(list(range(0,n+0))))
+        ordering = list(np.random.permutation(list(range(n))))
+    elif start == 'cost':
+        costs = [c([item]) for item in range(n)]
+        ordering = list(np.argsort(costs))
     else:
         ordering = start
     obj = msop(c, u, ordering)
@@ -49,8 +56,8 @@ def local(c, u, n, method, start=False):
     while improved:
         improved = False
         bestordering = ordering
-        for i in list(range(n)):
-            for j in range(i):
+        for i in range(n):
+            for j in range(n):
                 new = method(ordering, i, j)
                 objnew = msop(c, u, new)
                 num_msop += 1
@@ -63,15 +70,16 @@ def local(c, u, n, method, start=False):
     return {'obj': msop(c, u, ordering), 'ordering': ordering, 'num_rounds': num_rounds, 'num_msop':num_msop}
 
 def greedy(c, u, n):
-    remaining = list(range(0,n+0))
+    remaining = list(range(n))
     ordering = []
     while len(ordering) < n:
         maxitem = 'placeholder'
         maxratio = -1
         for item in remaining:
-            candidate = sorted((*ordering,item))
-            if u(candidate)/c(candidate) > maxratio:
-                maxratio = u(candidate)/c(candidate)
+            candidate = list((*ordering,item))
+            newval = (u(candidate)-u(ordering))/((c(candidate)-c(ordering)))
+            if newval > maxratio:
+                maxratio = newval
                 maxitem = item
         ordering += [maxitem]
         remaining.remove(maxitem)

@@ -4,7 +4,13 @@ import scipy.stats
 import matplotlib.pyplot as plt
 import time
 
+def distancematrix(n,m,a=0,b=100, dim=2):
+    customerpoints = np.random.randint(a,b,size=(m,dim))
+    facilitypoints = np.random.randint(a,b,size=(n,dim))
+
 def genfacility(n, m, a=10, b=100):
+    # n = number of facilities
+    # m = number of customers
     A = np.random.randint(a,b,size=(n,m))
     precomputed = {():0}
     def utility(S):
@@ -31,16 +37,18 @@ def modular(n, a=10, b=100):
     return cost
 
 def compare_ratio(n=20, m=20, iterations=100):
-    ratios_greedy, ratios_random = [], []
+    ratios_greedy, ratios_random, ratios_cost = [], [], []
     for i in range(iterations):
         utility = genfacility(n,m)
         cost = modular(n)
         greedydict = toolbox.greedy(cost, utility, n)
         localdict_greedy = toolbox.local(cost, utility, n, toolbox.insert, start=greedydict['ordering'])
         ratios_greedy += [localdict_greedy['obj']/greedydict['obj']]
-        localdict_random = toolbox.local(cost, utility, n, toolbox.insert)
-        ratios_random += [localdict_random['obj']/greedydict['obj']]
-    plothist([ratios_greedy, ratios_random], ['Greedy Start', 'Random Start'], iterations=iterations, n=n, m=m)
+        #localdict_random = toolbox.local(cost, utility, n, toolbox.move)
+        #ratios_random += [localdict_random['obj']/greedydict['obj']]
+        #localdict_cost = toolbox.local(cost, utility, n, toolbox.move, start='cost')
+        #ratios_cost += [localdict_cost['obj']/greedydict['obj']]
+    plothist([ratios_greedy, ratios_cost], ['Greedy Start', 'Cost Start'], iterations=iterations, n=n, m=m)
 
 
 def compare_time(ns, ms, iterations=10):
@@ -102,7 +110,7 @@ def plotplot(x, y, label):
 
 
 #profile('compare_ratio()')
-compare_ratio()
+compare_ratio(n=10, m =10, iterations=100)
 #ns = list(range(1,21))
 #compare_time(ns=ns, ms=[2*i for i in ns])
 
