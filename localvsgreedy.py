@@ -42,14 +42,13 @@ def compare_ratio(n=20, m=20, iterations=100):
         utility = genfacility(n,m)
         cost = modular(n)
         greedydict = toolbox.greedy(cost, utility, n)
-        localdict_greedy = toolbox.local(cost, utility, n, toolbox.insert, start=greedydict['ordering'])
+        localdict_greedy = toolbox.local(cost, utility, n, toolbox.move, start=greedydict['ordering'])
         ratios_greedy += [localdict_greedy['obj']/greedydict['obj']]
-        #localdict_random = toolbox.local(cost, utility, n, toolbox.move)
-        #ratios_random += [localdict_random['obj']/greedydict['obj']]
+        localdict_random = toolbox.repeatlocal(cost, utility, n, toolbox.move, runs=10)
+        ratios_random += [localdict_random['obj']/greedydict['obj']]
         #localdict_cost = toolbox.local(cost, utility, n, toolbox.move, start='cost')
         #ratios_cost += [localdict_cost['obj']/greedydict['obj']]
-    plothist([ratios_greedy, ratios_cost], ['Greedy Start', 'Cost Start'], iterations=iterations, n=n, m=m)
-
+    plothist([ratios_greedy, ratios_random], ['Greedy Start', 'Random Start'], iterations=iterations, n=n, m=m)
 
 def compare_time(ns, ms, iterations=10):
     local_times, greedy_times = [], []
@@ -110,7 +109,7 @@ def plotplot(x, y, label):
 
 
 #profile('compare_ratio()')
-compare_ratio(n=10, m =10, iterations=100)
+compare_ratio(n=10, m =1000, iterations=100)
 #ns = list(range(1,21))
 #compare_time(ns=ns, ms=[2*i for i in ns])
 

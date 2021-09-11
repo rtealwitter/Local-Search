@@ -69,6 +69,16 @@ def local(c, u, n, method, start=False):
         num_rounds += 1
     return {'obj': msop(c, u, ordering), 'ordering': ordering, 'num_rounds': num_rounds, 'num_msop':num_msop}
 
+def repeatlocal(c,u,n,method, runs):
+    minval = np.inf
+    mindict = {}
+    for i in range(runs):
+        newdict = local(c,u,n,method)
+        if newdict['obj'] < minval:
+            mindict = newdict
+            minval = newdict['obj']
+    return mindict
+
 def greedy(c, u, n):
     remaining = list(range(n))
     ordering = []
