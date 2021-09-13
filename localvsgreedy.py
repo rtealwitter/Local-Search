@@ -4,35 +4,27 @@ import scipy.stats
 import matplotlib.pyplot as plt
 import time
 
-def distancematrix(n,m,a=0,b=100, dim=2):
+def distancematrix(n,m,a=0,b=1, dim=2):
     customerpoints = np.random.randint(a,b,size=(m,dim))
     facilitypoints = np.random.randint(a,b,size=(n,dim))
 
-def genfacility(n, m, a=10, b=100):
+def genfacility(n, m, a=0, b=1):
     # n = number of facilities
     # m = number of customers
-    A = np.random.randint(a,b,size=(n,m))
-    precomputed = {():0}
+    A = np.random.uniform(a,b,size=(n,m))
     def utility(S):
-        key = tuple(S)
-        if key in precomputed:
-            return precomputed[key]
+        if len(S) == 0: return 0
         AS = A[list(S)]
         maxrow = np.amax(AS, axis=0)
         val = maxrow.sum()
-        precomputed[key] = val
         return val
     return utility
 
-def modular(n, a=10, b=100):
-    costs = np.random.randint(a,b,n)
-    precomputed = {():0}
+def modular(n, a=0, b=1):
+    costs = np.random.uniform(a,b,n)
     def cost(S): 
-        key = tuple(S)
-        if key in precomputed:
-            return precomputed[key]
+        if len(S) == 0: return 0
         val = costs[list(S)].sum()
-        precomputed[key] = val
         return val
     return cost
 
@@ -44,7 +36,7 @@ def compare_ratio(n=20, m=20, iterations=100):
         greedydict = toolbox.greedy(cost, utility, n)
         localdict_greedy = toolbox.local(cost, utility, n, toolbox.move, start=greedydict['ordering'])
         ratios_greedy += [localdict_greedy['obj']/greedydict['obj']]
-        localdict_random = toolbox.repeatlocal(cost, utility, n, toolbox.move, runs=10)
+        localdict_random = toolbox.repeatlocal(cost, utility, n, toolbox.move, runs=1)
         ratios_random += [localdict_random['obj']/greedydict['obj']]
         #localdict_cost = toolbox.local(cost, utility, n, toolbox.move, start='cost')
         #ratios_cost += [localdict_cost['obj']/greedydict['obj']]
@@ -109,7 +101,6 @@ def plotplot(x, y, label):
 
 
 #profile('compare_ratio()')
-compare_ratio(n=10, m =1000, iterations=100)
+compare_ratio(n=10, m =10, iterations=100)
 #ns = list(range(1,21))
 #compare_time(ns=ns, ms=[2*i for i in ns])
-

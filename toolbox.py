@@ -1,12 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-def toordering(chain):
-    ordering = []
-    for i in range(1, len(chain)):
-        ordering += [*set(chain[i]).difference(set(chain[i-1]))]
-    return ordering
-
 def unique(ordering):
     new = []
     for i in ordering:
@@ -14,17 +8,13 @@ def unique(ordering):
             new += [i]
     return new
 
-precomputed = {}
 def msop(c, u, ordering):
-    key = tuple(ordering)
-    if key in precomputed: return precomputed[key]
     obj = 0
-    current, previous = [], ()
+    current, previous = [], []
     for i in range(len(ordering)):
         previous = current[:]
         current += [ordering[i]]
         obj += c(current) * (u(current) - u(previous))
-    precomputed[key] = obj
     return obj
 
 def move(ordering, i, j):
@@ -86,7 +76,7 @@ def greedy(c, u, n):
         maxitem = 'placeholder'
         maxratio = -1
         for item in remaining:
-            candidate = list((*ordering,item))
+            candidate = ordering + [item]
             newval = (u(candidate)-u(ordering))/((c(candidate)-c(ordering)))
             if newval > maxratio:
                 maxratio = newval
