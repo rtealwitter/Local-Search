@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import itertools
 
 def unique(ordering):
     new = []
@@ -8,13 +9,17 @@ def unique(ordering):
             new += [i]
     return new
 
-def msop(c, u, ordering):
+def msop(c, u, ordering, msop_saved=False):
+    key = tuple(ordering)
+    if isinstance(msop_saved,dict):
+        if key in msop_saved: return msop_saved[key]
     obj = 0
     current, previous = [], []
     for i in range(len(ordering)):
         previous = current[:]
         current += [ordering[i]]
         obj += c(current) * (u(current) - u(previous))
+    if isinstance(msop_saved, dict): msop_saved[key] = obj
     return obj
 
 def move(ordering, i, j):
@@ -31,7 +36,7 @@ def insert(ordering, i, j):
 def swap(ordering, i, j):
     return ordering[:j] + [ordering[i]] + ordering[j+1:i] + [ordering[j]] + ordering[i+1:]
 
-def local(c, u, n, method, start=False):
+def local(c, u, n, method, msop_saved=False, start=False):
     if start == False:
         ordering = list(np.random.permutation(list(range(n))))
     elif start == 'cost':
@@ -49,7 +54,7 @@ def local(c, u, n, method, start=False):
         for i in range(n):
             for j in range(n):
                 new = method(ordering, i, j)
-                objnew = msop(c, u, new)
+                objnew = msop(c, u, new, msop_saved=msop_saved)
                 num_msop += 1
                 if objnew < obj: 
                     obj = objnew
@@ -59,11 +64,11 @@ def local(c, u, n, method, start=False):
         num_rounds += 1
     return {'obj': msop(c, u, ordering), 'ordering': ordering, 'num_rounds': num_rounds, 'num_msop':num_msop}
 
-def repeatlocal(c,u,n,method, runs):
+def repeatlocal(c,u,n,method, runs, msop_saved={():0}):
     minval = np.inf
     mindict = {}
     for i in range(runs):
-        newdict = local(c,u,n,method)
+        newdict = local(c,u,n,method, msop_saved=msop_saved)
         if newdict['obj'] < minval:
             mindict = newdict
             minval = newdict['obj']
@@ -85,6 +90,17 @@ def greedy(c, u, n):
         remaining.remove(maxitem)
     obj = msop(c, u, ordering)
     return {'obj': obj, 'ordering': ordering}
+
+def optimal(c, u, n, msop_saved={():0}):
+    permutations = itertools.permutations(range(n))
+    bestobj = np.Inf
+    bestordering = []
+    for perm in permutations:
+        newobj = msop(c,u,perm,msop_saved=msop_saved)
+        if newobj < bestobj:
+            bestobj = newobj
+            bestordering = perm
+    return {'obj':bestobj, 'ordering':bestordering}
 
 def plothist(xs, labels, title='Frequency of Ratios', bin_num=20):
     bins = np.linspace(min(sum(xs, [])), max(sum(xs, [])), bin_num)
