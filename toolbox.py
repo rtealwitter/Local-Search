@@ -36,8 +36,8 @@ def insert(ordering, i, j):
 def swap(ordering, i, j):
     return ordering[:j] + [ordering[i]] + ordering[j+1:i] + [ordering[j]] + ordering[i+1:]
 
-def local(c, u, n, method, msop_saved=False, start=False):
-    if start == False:
+def local(c, u, n, method, msop_saved={():0}, start='random'):
+    if start == 'random':
         ordering = list(np.random.permutation(list(range(n))))
     elif start == 'cost':
         costs = [c([item]) for item in range(n)]

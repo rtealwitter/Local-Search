@@ -37,12 +37,13 @@ def modular(n, a=0, b=1):
     return cost
 
 def compare_ratio(n, m, iterations):
-    ratios_greedy, ratios_random, ratios_cost = [], [], []
+    start = time.time()
+    ratios_greedy, ratios_random, ratios_cost = [], [], [] 
     for i in range(iterations):
         utility = genfacility(n,m)
         cost = modular(n)
         msop_saved = {():0}
-        #optimaldict = toolbox.optimal(cost, utility, n, msop_saved)
+        #optimaldict = toolbox.optimal(cost, utility, n, msop_saved=msop_saved)
         greedydict = toolbox.greedy(cost, utility, n)
         denominator = greedydict['obj']
         localdict_greedy = toolbox.local(cost, utility, n, toolbox.move, msop_saved = msop_saved, start=greedydict['ordering'])
@@ -52,6 +53,7 @@ def compare_ratio(n, m, iterations):
         #localdict_cost = toolbox.local(cost, utility, n, toolbox.move, start='cost')
         #ratios_cost += [localdict_cost['obj']/greedydict['obj']]
     plothist([ratios_greedy, ratios_random], ['Greedy Start', 'Random Start'], iterations=iterations, n=n, m=m)
+    print('Time:', time.time()-start)
 
 def compare_time(ns, ms, iterations=10):
     local_times, greedy_times = [], []
