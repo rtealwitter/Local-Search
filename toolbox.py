@@ -62,6 +62,8 @@ def local(c, u, n, method, msop_saved={():0}, start='random'):
                     improved = True
         ordering = bestordering
         num_rounds += 1
+        if num_rounds > n:
+            break
     return {'obj': msop(c, u, ordering), 'ordering': ordering, 'num_rounds': num_rounds, 'num_msop':num_msop}
 
 def repeatlocal(c,u,n,method, runs, msop_saved={():0}):

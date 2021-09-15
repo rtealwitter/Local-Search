@@ -112,6 +112,7 @@ def plotplot(x, y, label):
 
 
 #profile('compare_ratio()')
+np.random.seed(1)
 compare_ratio(n=7, m=7, iterations=100)
 #ns = list(range(1,21))
 #compare_time(ns=ns, ms=[2*i for i in ns])
