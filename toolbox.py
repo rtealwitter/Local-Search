@@ -26,7 +26,7 @@ def move(ordering, i, j):
     if i == j:
         return ordering
     if i < j:
-        return ordering[:i] + ordering[(i+1):(j+1)] + [ordering[i]] + ordering[(j+1):]
+        return ordering[:i] + ordering[(i+1):j] + [ordering[i]] + ordering[j:]
     if j < i:
         return ordering[:j] + [ordering[i]] + ordering[j:i] + ordering[(i+1):]
 
