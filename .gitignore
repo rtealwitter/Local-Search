@@ -1,3 +1,5 @@
 *.pyc
 stats
 .DS_Store
+__pycache__
+data/
