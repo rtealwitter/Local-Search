@@ -1,6 +1,6 @@
 *.pyc
 stats
 .DS_Store
-__pycache__
+__pycache__/
 data/
 .ipynb_checkpoints
