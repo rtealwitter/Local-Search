@@ -93,11 +93,11 @@ def plotplot(x, y, label):
 
 #profile('compare_ratio()')
 #ns = list(range(1,21))f
-iterations = 100
+iterations = 1
 n = 20
 #compare_time(ns=ns, cost_function=modular, utility_function=facilitylocation.genfacility)
 np.random.seed(1)
-greedy_ratio, local_ratio = compare_ratio(n=n, cost_function=modular, utility_function=facilitylocation.genfacility, iterations=iterations)
-plothist([greedy_ratio, local_ratio], ['Greedy', 'Local'], iterations=iterations, n=n, problem='Facility Location', items='Facilities')
+#greedy_ratio, local_ratio = compare_ratio(n=n, cost_function=modular, utility_function=facilitylocation.genfacility, iterations=iterations)
+#plothist([greedy_ratio, local_ratio], ['Greedy', 'Local'], iterations=iterations, n=n, problem='Facility Location', items='Facilities')
 greedy_ratio, local_ratio = compare_ratio(n=n, cost_function=modular, utility_function=entropy.genentropy, iterations=iterations)
 plothist([greedy_ratio, local_ratio], ['Greedy', 'Local'], iterations=iterations, n=n, problem='Entropy', items='Sensors')

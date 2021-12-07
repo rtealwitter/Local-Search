@@ -29,11 +29,6 @@ def build_covariance_pair(partial_observations, common_sensors):
         total, num = 0, 0
         sensor_i = common_sensors[i]
         for time in partial_observations:
-            if sensor_i >= len(partial_observations[time]):
-                print(common_sensors)
-                print(i)
-                print(sensor_i)
-                print(partial_observations[time])
             value = partial_observations[time][sensor_i]
             if  value != 'NA':
                 total += value
@@ -87,10 +82,21 @@ def build_conditional(S, sigma, variance_scalar=1):
     sigma_VV = sigma[np.ix_(V,V)]
     sigma_SS_inv = np.linalg.inv(sigma_SS + np.eye(len(S))*variance_scalar)
     return sigma_VV - sigma_VS @ sigma_SS_inv @ sigma_SV
-filename = 'data/temperature.txt'
-# Sensors with more than 10,000 observations with temps within recorded temps of Berkeley, CA
+
+def write_observations(COMMON_SENSORS, filename = 'data/temperature.txt'):    
+    partial_observations = read_partial(filename, COMMON_SENSORS)
+    with open('data/temperature_observations.txt', 'w') as f:
+        f.write(str(partial_observations))
+
+def read_observations(filename='data/temperature_observations.txt'):
+    with open(filename, 'r') as f:
+        partial_observations = eval(f.readline())
+    return partial_observations
+
+# Sensors with more than 10,000 observations of temps within recorded temps of Berkeley, CA
 COMMON_SENSORS = [1, 2, 3, 4, 6, 7, 8, 9, 10, 11, 12, 13, 14, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54]
-partial_observations = read_partial(filename, COMMON_SENSORS)
+partial_observations = read_observations()
+
 def genentropy(n): 
     common_sensors = random.sample(list(range(len(COMMON_SENSORS))), n)
     sigma = build_covariance_pair(partial_observations, common_sensors)

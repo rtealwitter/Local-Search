@@ -2,5 +2,5 @@
 stats
 .DS_Store
 __pycache__/
-data/
+data/temperature.txt
 .ipynb_checkpoints
