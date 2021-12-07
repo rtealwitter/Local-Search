@@ -93,8 +93,8 @@ def plotplot(x, y, label):
 
 #profile('compare_ratio()')
 #ns = list(range(1,21))f
-iterations = 100
-n = 20
+iterations = 1000
+n = 15
 #compare_time(ns=ns, cost_function=modular, utility_function=facilitylocation.genfacility)
 np.random.seed(1)
 greedy_ratio, local_ratio = compare_ratio(n=n, cost_function=modular, utility_function=facilitylocation.genfacility, iterations=iterations)
