@@ -3,3 +3,4 @@ stats
 .DS_Store
 __pycache__
 data/
+.ipynb_checkpoints

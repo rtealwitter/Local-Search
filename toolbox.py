@@ -81,7 +81,7 @@ def greedy(c, u, n):
     ordering = []
     while len(ordering) < n:
         maxitem = 'placeholder'
-        maxratio = -1
+        maxratio = - np.inf
         for item in remaining:
             candidate = ordering + [item]
             newval = (u(candidate)-u(ordering))/((c(candidate)-c(ordering)))
