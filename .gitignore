@@ -3,4 +3,5 @@ stats
 .DS_Store
 __pycache__/
 data/temperature.txt
+data/citibike.csv
 .ipynb_checkpoints

@@ -2,8 +2,10 @@ import toolbox
 import numpy as np
 import matplotlib.pyplot as plt
 import time
+import setcover
 import facilitylocation
 import entropy
+import gc
 
 def modular(n, a=0, b=1):
     costs = np.random.uniform(a,b,n)
@@ -20,6 +22,7 @@ def compare_ratio(n, cost_function, utility_function, iterations):
     start = time.time()
     greedy_ratio, local_ratio = [], []
     for i in range(iterations):
+        gc.collect()
         utility = utility_function(n)
         cost = cost_function(n)
         msop_saved = {():0}
@@ -34,27 +37,6 @@ def compare_ratio(n, cost_function, utility_function, iterations):
     print('Time:', time.time()-start)
     return greedy_ratio, local_ratio
     
-
-def compare_time(ns, cost_function, utility_function, iterations=10):
-    local_times, greedy_times = [], []
-    for j in range(len(ns)):
-        n = ns[j]
-        greedy_time, local_time = 0, 0
-        for i in range(iterations):
-            utility = utility_function(n)
-            cost = cost_function(n)
-            start = time.time()
-            greedydict = toolbox.greedy(cost, utility, n)
-            greedy_time += time.time() - start
-            start = time.time()
-            localdict = toolbox.local(cost, utility, n, toolbox.insert, start=greedydict['ordering'])
-            local_time += time.time() - start
-        local_times += [local_time/iterations]
-        greedy_times += [greedy_time/iterations]
-    plotplot(ns, greedy_times, 'Greedy')
-    plotplot(ns, local_times, 'Local')
-
-
 def profile(command):
     import cProfile
     import pstats
@@ -76,27 +58,11 @@ def plothist(xs, labels, iterations, n, problem, items, bin_num=20):
     plt.savefig(f'graphics/localvsgreedy_{problem.lower().split()[0]}.pdf')
     plt.clf()
 
-def plotplot(x, y, label):
-    plt.scatter(x, y, label=label)
-    for deg in [2,3]:
-        X = np.linspace(min(x), max(x), num=100)
-        coeffs = np.polyfit(x, y, deg=deg)
-        equation = '+'.join([str(coeffs[i]) + 'x^'+str(deg-i) for i in range(len(coeffs))])
-        Y = np.polyval(coeffs, X)
-        plt.plot(X, Y, label='Least Squares Degree '+str(deg))
-    plt.xlabel('Number of Facilities')
-    plt.ylabel('Time')
-    plt.legend()
-    plt.title('Running Time per Iteration vs Number of Facilities')
-    plt.savefig('graphics/complexity_{}.pdf'.format(label.lower()))
-    plt.clf()
-
-#profile('compare_ratio()')
-#ns = list(range(1,21))f
-iterations = 1000
-n = 15
-#compare_time(ns=ns, cost_function=modular, utility_function=facilitylocation.genfacility)
-np.random.seed(1)
+iterations = 100
+n = 30
+#np.random.seed(1)
+greedy_ratio, local_ratio = compare_ratio(n=n, cost_function=modular, utility_function=setcover.gencover, iterations=iterations)
+plothist([greedy_ratio, local_ratio], ['Greedy', 'Local'], iterations=iterations, n=n, problem='Set Cover', items='Sets')
 greedy_ratio, local_ratio = compare_ratio(n=n, cost_function=modular, utility_function=facilitylocation.genfacility, iterations=iterations)
 plothist([greedy_ratio, local_ratio], ['Greedy', 'Local'], iterations=iterations, n=n, problem='Facility Location', items='Facilities')
 greedy_ratio, local_ratio = compare_ratio(n=n, cost_function=modular, utility_function=entropy.genentropy, iterations=iterations)

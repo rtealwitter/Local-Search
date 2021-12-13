@@ -36,7 +36,7 @@ def insert(ordering, i, j):
 def swap(ordering, i, j):
     return ordering[:j] + [ordering[i]] + ordering[j+1:i] + [ordering[j]] + ordering[i+1:]
 
-def local(c, u, n, method, msop_saved={():0}, start='random'):
+def local(c, u, n, method, msop_saved={():0}, start='random', num_comparisons=100):
     if start == 'random':
         ordering = list(np.random.permutation(list(range(n))))
     elif start == 'cost':
@@ -48,18 +48,22 @@ def local(c, u, n, method, msop_saved={():0}, start='random'):
     improved = True
     num_rounds = 0
     num_msop = 1
+    num_comparisons = min(num_comparisons, int(n**2/2))
     while improved:
         improved = False
         bestordering = ordering
-        for i in range(n):
-            for j in range(n):
-                new = method(ordering, i, j)
-                objnew = msop(c, u, new, msop_saved=msop_saved)
-                num_msop += 1
-                if objnew < obj: 
-                    obj = objnew
-                    bestordering = unique(new)
-                    improved = True
+        #for i in range(n):
+        #    for j in range(n):
+        for _ in range(num_comparisons):
+            i = np.random.randint(n)
+            j = np.random.randint(n)
+            new = method(ordering, i, j)
+            objnew = msop(c, u, new, msop_saved=msop_saved)
+            num_msop += 1
+            if objnew < obj: 
+                obj = objnew
+                bestordering = unique(new)
+                improved = True
         ordering = bestordering
         num_rounds += 1
         if num_rounds > n:
