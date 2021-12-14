@@ -18,7 +18,7 @@ def modular(n, a=0, b=1):
         return val
     return cost
 
-def compare_ratio(n, cost_function, utility_function, iterations):
+def compare_ratio(n, cost_function, utility_function, iterations, num_comparisons):
     start = time.time()
     greedy_ratio, local_ratio = [], []
     for i in range(iterations):
@@ -28,7 +28,7 @@ def compare_ratio(n, cost_function, utility_function, iterations):
         msop_saved = {():0}
         #optimaldict = toolbox.optimal(cost, utility, n, msop_saved=msop_saved)
         greedydict = toolbox.greedy(cost, utility, n)
-        localdict_random = toolbox.repeatlocal(cost, utility, n, toolbox.move, runs=5, msop_saved=msop_saved)
+        localdict_random = toolbox.repeatlocal(cost, utility, n, toolbox.move, runs=5, msop_saved=msop_saved, num_comparisons=num_comparisons)
         denominator = min(greedydict['obj'], localdict_random['obj'])
         greedy_ratio += [greedydict['obj']/denominator] 
         local_ratio += [localdict_random['obj']/denominator] 
@@ -61,9 +61,9 @@ def plothist(xs, labels, iterations, n, problem, items, bin_num=20):
 iterations = 100
 n = 30
 #np.random.seed(1)
-greedy_ratio, local_ratio = compare_ratio(n=n, cost_function=modular, utility_function=setcover.gencover, iterations=iterations)
+greedy_ratio, local_ratio = compare_ratio(n=n, cost_function=modular, utility_function=setcover.gencover, iterations=iterations, num_comparisons=np.inf)
 plothist([greedy_ratio, local_ratio], ['Greedy', 'Local'], iterations=iterations, n=n, problem='Set Cover', items='Sets')
-greedy_ratio, local_ratio = compare_ratio(n=n, cost_function=modular, utility_function=facilitylocation.genfacility, iterations=iterations)
+greedy_ratio, local_ratio = compare_ratio(n=n, cost_function=modular, utility_function=facilitylocation.genfacility, iterations=iterations, num_comparisons=np.inf)
 plothist([greedy_ratio, local_ratio], ['Greedy', 'Local'], iterations=iterations, n=n, problem='Facility Location', items='Facilities')
-greedy_ratio, local_ratio = compare_ratio(n=n, cost_function=modular, utility_function=entropy.genentropy, iterations=iterations)
+greedy_ratio, local_ratio = compare_ratio(n=n, cost_function=modular, utility_function=entropy.genentropy, iterations=iterations, num_comparisons=100)
 plothist([greedy_ratio, local_ratio], ['Greedy', 'Local'], iterations=iterations, n=n, problem='Entropy', items='Sensors')

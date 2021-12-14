@@ -70,11 +70,11 @@ def local(c, u, n, method, msop_saved={():0}, start='random', num_comparisons=10
             break
     return {'obj': msop(c, u, ordering), 'ordering': ordering, 'num_rounds': num_rounds, 'num_msop':num_msop}
 
-def repeatlocal(c,u,n,method, runs, msop_saved={():0}):
+def repeatlocal(c,u,n,method, runs, msop_saved={():0}, num_comparisons=False):
     minval = np.inf
     mindict = {}
     for i in range(runs):
-        newdict = local(c,u,n,method, msop_saved=msop_saved)
+        newdict = local(c,u,n,method, msop_saved=msop_saved, num_comparisons=num_comparisons)
         if newdict['obj'] < minval:
             mindict = newdict
             minval = newdict['obj']
