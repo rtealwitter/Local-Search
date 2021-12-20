@@ -12,7 +12,8 @@ def buildcoverinstance(n,m,target,agree,p):
             cols += [new]
     return np.column_stack(cols)
 
-def gencover(n, m=20, agree=.7, p=.3, target=4):
+def gencover(n, agree=.7, p=.3, target=4):
+    m = n*2
     # n = number of sets
     # m = number of ground elements
     # target = size of conditional groups
