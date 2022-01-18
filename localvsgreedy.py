@@ -1,3 +1,4 @@
+from email import iterators
 import toolbox
 import numpy as np
 import matplotlib.pyplot as plt
@@ -18,23 +19,27 @@ def modular(n, a=0, b=1):
         return val
     return cost
 
-def compare_ratio(n, cost_function, utility_function, iterations, num_comparisons):
-    start = time.time()
+def compare_ratio(n, cost_function, utility_function, iterations):
     greedy_ratio, local_ratio = [], []
+    greedy_time, local_time = 0, 0
     for i in range(iterations):
         gc.collect()
         utility = utility_function(n)
         cost = cost_function(n)
-        msop_saved = {():0}
-        #optimaldict = toolbox.optimal(cost, utility, n, msop_saved=msop_saved)
+
+        start = time.time()
         greedydict = toolbox.greedy(cost, utility, n)
-        localdict_random = toolbox.repeatlocal(cost, utility, n, toolbox.move, runs=5, msop_saved=msop_saved, num_comparisons=num_comparisons)
+        greedy_time += time.time() - start
+
+        start = time.time()
+        localdict_random = toolbox.repeatlocal(cost, utility, n, runs=5)
+        local_time += time.time() - start
+
         denominator = min(greedydict['obj'], localdict_random['obj'])
         greedy_ratio += [greedydict['obj']/denominator] 
         local_ratio += [localdict_random['obj']/denominator] 
-        #localdict_greedy = toolbox.local(cost, utility, n, toolbox.move, msop_saved = msop_saved, start=greedydict['ordering'])
-        #localdict_cost = toolbox.local(cost, utility, n, toolbox.move, start='cost')
-    print('Time:', time.time()-start)
+    print('Greedy Time:', greedy_time)
+    print('Local Time:', local_time)
     return greedy_ratio, local_ratio
     
 def profile(command):
@@ -45,12 +50,13 @@ def profile(command):
     p.sort_stats(pstats.SortKey.TIME).print_stats(30)
 
 def plothist(xs, labels, iterations, n, problem, items, bin_num=20):
+    plt.rcParams.update({'font.size': 15})
     colors = ['#D12757', '#75CDFA', '#2437E6', '#FF6A10']
     bins = np.linspace(min(sum(xs, [])), max(sum(xs,[])), bin_num)
     for i in range(len(labels)):
         plt.hist(xs[i], bins, alpha=0.5, label=labels[i], color=colors[i])
     plt.axvline(x=1, color='red')
-    plt.xlabel('Objective Value')
+    plt.xlabel('Relative Objective Value')
     plt.ylabel('Frequency ({} Iterations)'.format(iterations))
     plt.legend()
     #plt.suptitle('Histogram of Greedy and Local Search Performance Against Best Heuristic')
@@ -60,10 +66,11 @@ def plothist(xs, labels, iterations, n, problem, items, bin_num=20):
 
 iterations = 100
 n = 30
-#np.random.seed(1)
-greedy_ratio, local_ratio = compare_ratio(n=n, cost_function=modular, utility_function=setcover.gencover, iterations=iterations, num_comparisons=np.inf)
+np.random.seed(1)
+
+greedy_ratio, local_ratio = compare_ratio(n=n, cost_function=modular, utility_function=setcover.gencover, iterations=iterations)
 plothist([greedy_ratio, local_ratio], ['Greedy', 'Local'], iterations=iterations, n=n, problem='Set Cover', items='Sets')
-greedy_ratio, local_ratio = compare_ratio(n=n, cost_function=modular, utility_function=facilitylocation.genfacility, iterations=iterations, num_comparisons=np.inf)
+greedy_ratio, local_ratio = compare_ratio(n=n, cost_function=modular, utility_function=facilitylocation.genfacility, iterations=iterations)
 plothist([greedy_ratio, local_ratio], ['Greedy', 'Local'], iterations=iterations, n=n, problem='Facility Location', items='Facilities')
-greedy_ratio, local_ratio = compare_ratio(n=n, cost_function=modular, utility_function=entropy.genentropy, iterations=iterations, num_comparisons=np.inf)
+greedy_ratio, local_ratio = compare_ratio(n=n, cost_function=modular, utility_function=entropy.genentropy, iterations=iterations)
 plothist([greedy_ratio, local_ratio], ['Greedy', 'Local'], iterations=iterations, n=n, problem='Sensor Placement', items='Sensors')

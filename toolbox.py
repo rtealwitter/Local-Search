@@ -9,6 +9,10 @@ def unique(ordering):
             new += [i]
     return new
 
+def clevermsop(c, u, ordering, previous_msop=False, msop_saved=False):
+    if previous_msop == False: return msop(c, u, ordering, msop_saved) 
+    
+
 def msop(c, u, ordering, msop_saved=False):
     key = tuple(ordering)
     if isinstance(msop_saved,dict):
@@ -23,6 +27,7 @@ def msop(c, u, ordering, msop_saved=False):
     return obj
 
 def move(ordering, i, j):
+    # move ith element to jth position
     if i == j:
         return ordering
     if i < j:
@@ -30,13 +35,30 @@ def move(ordering, i, j):
     if j < i:
         return ordering[:j] + [ordering[i]] + ordering[j:i] + ordering[(i+1):]
 
+def clevermove(ordering, i, j, c, u, previous_msop=False):
+    new_ordering = move(ordering, i, j)
+    new_msop = []
+    if previous_msop == False or j == 0:     
+        current, previous = [], []
+        for i in range(len(new_ordering)):
+            previous = current[:]
+            current += [new_ordering[i]]
+            new_msop += [c(current) * (u(current)-u(previous))]
+    else:
+        new_msop = previous_msop[:]
+        if j >= 2: new_msop[j-2] = c(new_ordering[:j-1])*(u(new_ordering[:j-1])-u(new_ordering[:j-2]))
+        new_msop[j-1] = c(new_ordering[:j])*(u(new_ordering[:j])-u(new_ordering[:j-1]))
+        new_msop[j] = c(new_ordering[:j+1])*(u(new_ordering[:j+1])-u(new_ordering[:j]))
+    return new_msop
+
 def insert(ordering, i, j):
     return ordering[:j] + [ordering[i]] + ordering[j:]
 
 def swap(ordering, i, j):
     return ordering[:j] + [ordering[i]] + ordering[j+1:i] + [ordering[j]] + ordering[i+1:]
 
-def local(c, u, n, method, msop_saved={():0}, start='random', num_comparisons=100):
+def local(c, u, n, start='random'):
+    check = False#True
     if start == 'random':
         ordering = list(np.random.permutation(list(range(n))))
     elif start == 'cost':
@@ -48,33 +70,33 @@ def local(c, u, n, method, msop_saved={():0}, start='random', num_comparisons=10
     improved = True
     num_rounds = 0
     num_msop = 1
-    num_comparisons = min(num_comparisons, int(n**2/2))
+    previous_msop = False
     while improved:
         improved = False
         bestordering = ordering
-        #for i in range(n):
-        #    for j in range(n):
-        for _ in range(num_comparisons):
-            i = np.random.randint(n)
-            j = np.random.randint(n)
-            new = method(ordering, i, j)
-            objnew = msop(c, u, new, msop_saved=msop_saved)
-            num_msop += 1
-            if objnew < obj: 
-                obj = objnew
-                bestordering = unique(new)
-                improved = True
+        for i in range(n):
+            for j in range(n):
+                previous_msop = clevermove(ordering, i, j, c, u, previous_msop)
+                objnew = sum(previous_msop)
+                if check:
+                    objcheck = msop(c, u, move(ordering, i, j))
+                    assert np.allclose(objcheck, objnew)
+                num_msop += 1
+                if objnew < obj: 
+                    obj = objnew
+                    bestordering = move(ordering, i, j)
+                    improved = True
         ordering = bestordering
         num_rounds += 1
         if num_rounds > n:
             break
     return {'obj': msop(c, u, ordering), 'ordering': ordering, 'num_rounds': num_rounds, 'num_msop':num_msop}
 
-def repeatlocal(c,u,n,method, runs, msop_saved={():0}, num_comparisons=False):
+def repeatlocal(c, u, n, runs):
     minval = np.inf
     mindict = {}
     for i in range(runs):
-        newdict = local(c,u,n,method, msop_saved=msop_saved, num_comparisons=num_comparisons)
+        newdict = local(c, u, n, start='random')
         if newdict['obj'] < minval:
             mindict = newdict
             minval = newdict['obj']
