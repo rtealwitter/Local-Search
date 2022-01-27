@@ -1,4 +1,3 @@
-from email import iterators
 import toolbox
 import numpy as np
 import matplotlib.pyplot as plt
@@ -64,13 +63,13 @@ def plothist(xs, labels, iterations, n, problem, items, bin_num=20):
     plt.savefig(f'graphics/localvsgreedy_{problem.lower().split()[0]}.pdf')
     plt.clf()
 
-iterations = 100
-n = 30
+iterations = 10
+n = 10
 np.random.seed(1)
 
 greedy_ratio, local_ratio = compare_ratio(n=n, cost_function=modular, utility_function=setcover.gencover, iterations=iterations)
 plothist([greedy_ratio, local_ratio], ['Greedy', 'Local'], iterations=iterations, n=n, problem='Pipelined Set Cover', items='Sets')
-#greedy_ratio, local_ratio = compare_ratio(n=n, cost_function=modular, utility_function=facilitylocation.genfacility, iterations=iterations)
-#plothist([greedy_ratio, local_ratio], ['Greedy', 'Local'], iterations=iterations, n=n, problem='Facility Location', items='Facilities')
-#greedy_ratio, local_ratio = compare_ratio(n=n, cost_function=modular, utility_function=entropy.genentropy, iterations=iterations)
-#plothist([greedy_ratio, local_ratio], ['Greedy', 'Local'], iterations=iterations, n=n, problem='Sensor Placement', items='Sensors')
+greedy_ratio, local_ratio = compare_ratio(n=n, cost_function=modular, utility_function=facilitylocation.genfacility, iterations=iterations)
+plothist([greedy_ratio, local_ratio], ['Greedy', 'Local'], iterations=iterations, n=n, problem='Facility Location', items='Facilities')
+greedy_ratio, local_ratio = compare_ratio(n=n, cost_function=modular, utility_function=entropy.genentropy, iterations=iterations)
+plothist([greedy_ratio, local_ratio], ['Greedy', 'Local'], iterations=iterations, n=n, problem='Sensor Placement', items='Sensors')
