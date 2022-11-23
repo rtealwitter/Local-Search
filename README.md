@@ -1,5 +1,7 @@
 # A Local Search Algorithm for Min-Sum Submodular Cover
 
+This repository holds the code for [this](https://arxiv.org/abs/2209.03054) paper.
+
 ### Introduction
 This repository holds the code and dataset we used to run
 experiments.
